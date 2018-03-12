@@ -1,0 +1,17 @@
+{
+  "name": "auth-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server/app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "jsonwebtoken": "^8.2.0",
+    "nodemon": "^1.17.1",
+    "socket.io": "^2.0.4"
+  }
+}
