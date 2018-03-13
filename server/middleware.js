@@ -1,9 +1,9 @@
-const user = require('./user');
+const { user } = require('./user');
 
 var authenticate = (req, res, next) => {
   var token = req.header('x-auth');
 
-  if (user.token === token) {
+  if (user.tokenData.token === token) {
     req.user = user;
     req.token = token;
     next();
