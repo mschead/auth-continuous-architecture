@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const { authenticate } = require('./middleware');
 const { compareCredentials, generateAuthToken } = require('./user');
-const { addDevice } = require('./device');
+const { addDevice, findDevice } = require('./device');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -30,32 +30,41 @@ app.post('/user/login', (req, res) => {
 
 });
 
-// make this post, just to add a device. isolate the socket creation
 app.post('/device', authenticate, (req, res) => {
   const name = req.body.name;
-  addDevice({ name });
-
-  io.on('connection', (socket) => {
-
-    socket.on('join', (params, callback) => {
-  
-      // generate a id for each device
-      socket.join(params.name);
-  
-      callback();
-    });
-  
-    socket.on('createValue', (data) => {
-      socket.broadcast.emit('newValue', data);
-      console.log(`Got ${data.value} from device!`);
-    });
-    socket.on('confirm', (data) => {
-      console.log(`Connected`);
-    });
-  });
+  const password = req.body.password;
+  addDevice({ name, password });
 
   res.send('feito');
   
+});
+
+require('socketio-auth')(io, {
+  authenticate: function (socket, data, callback) {
+    const device = findDevice(data.username, data.password);
+
+    if (!device)  {
+      return callback(new Error("User not found"));
+    }
+    return callback(null, true);
+  }
+});
+
+io.on('connection', (socket) => {
+
+  socket.on('join', (params, callback) => {
+
+    // generate a id for each device
+    socket.join(params.name);
+
+    callback();
+  });
+
+  socket.on('createValue', (data) => {
+    socket.broadcast.emit('newValue', data);
+    console.log(`Got ${data.value} from device!`);
+  });
+
 });
 
 server.listen(port, () => {
