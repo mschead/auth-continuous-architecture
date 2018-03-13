@@ -12,6 +12,7 @@
     "express": "^4.16.2",
     "jsonwebtoken": "^8.2.0",
     "nodemon": "^1.17.1",
-    "socket.io": "^2.0.4"
+    "socket.io": "^2.0.4",
+    "socketio-auth": "^0.1.0"
   }
 }
