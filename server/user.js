@@ -8,7 +8,7 @@ let user = {
   _id: '2018yes',
   // email: 'marcos@gmail.com',
   password: undefined,
-  token: {}
+  tokenData: {}
 };
 
 bcrypt.genSalt(10, (err, salt) => {
@@ -32,7 +32,7 @@ const compareCredentials = (email, password) => {
 const generateAuthToken = () => {
   var access = 'auth';
   var token = jwt.sign({ _id: user._id, access }, JWT_SECRET);
-  user.token = { access, token };
+  user.tokenData = { access, token };
   return token;
 };
 
