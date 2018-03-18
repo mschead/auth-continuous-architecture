@@ -11,10 +11,6 @@ jQuery('#login').on('click', function (e) {
     _socket.on('authenticated', function() {
       alert("Connected!");
       
-      _socket.emit('join', { name: jQuery('#username').val() }, function () {
-        console.log('join successful')
-      });
-
       _socket.on('newValue', (data) => {
         console.log(`Got ${data.value} from device!`);
       });
@@ -28,15 +24,11 @@ jQuery('#login').on('click', function (e) {
   });
 });
 
-jQuery('#send').on('click', function (e) {
-  alert("Sending data");
-  _socket.emit('createValue', { value: 20 });
-});
 
 jQuery('#join').on('click', function (e) {
   var device = { name: jQuery('#device').val() } 
   
   _socket.emit('join', device, function () {
-  console.log('join successful')
+    console.log('join successful')
   });
 });

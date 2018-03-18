@@ -5,9 +5,10 @@ const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 
-const { authenticate } = require('./middleware');
+const { authenticateUser, authenticateDevice } = require('./middleware');
 const { compareCredentials, generateAuthToken } = require('./user');
-const { addDevice, findDevice } = require('./device');
+const { addDevice, findDevice,
+        compareDeviceCredentials, generateDeviceAuthToken } = require('./device');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -30,13 +31,34 @@ app.post('/user/login', (req, res) => {
 
 });
 
-app.post('/device', authenticate, (req, res) => {
+app.post('/device', authenticateUser, (req, res) => {
   const name = req.body.name;
   const password = req.body.password;
+
   addDevice({ name, password });
 
   res.send('feito');
+});
+
+app.post('/device/login', (req, res) => {
+  debugger;
+  compareDeviceCredentials(req.body.name, req.body.password).then((device) => {
+    debugger;
+    const token = generateDeviceAuthToken(device);
+    res.header('x-auth', token).send();
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
   
+});
+
+//app.post('/device/send', authenticateDevice, (req, req) => {
+//  // refresh value
+//});
+
+app.get('/sockets', (req, res) => {
+  console.log(io.sockets.sockets);
+  res.send();
 });
 
 require('socketio-auth')(io, {
