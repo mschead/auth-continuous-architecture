@@ -41,7 +41,6 @@ const compareDeviceCredentials = (name, password) => {
 
     return new Promise((resolve, reject) => {
       bcrypt.compare(password, device.password, function (err, res) {
-        debugger;
         if (res) {
           resolve(device);
         } else {
@@ -58,14 +57,14 @@ const findOne = (name) => {
     let device = devices.find((device) => device.name === name);
     if (!device) {
       reject();
+    } else {
+      resolve(device);
     }
-    resolve(device);
   })
 };
 
 const save = (device) => {
   devices = devices.map((newDevice) => {
-    debugger;
     if (device.name === newDevice.name) {
       return device;
     }
