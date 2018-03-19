@@ -19,10 +19,10 @@ $('#login').on('click', function (e) {
       'Content-Type': 'application/json'
     },
     success: function (data) {
-      alert("Success in login!: " + data);     
+      alert("Success in login!");
     },
     error: function (data){
-      alert("Error sending data: " + data);        
+      alert("Error sending data!");
     }
   });
 

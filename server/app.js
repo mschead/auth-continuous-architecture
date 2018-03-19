@@ -5,10 +5,16 @@ const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 
-const { authenticateUser, authenticateDevice } = require('./middleware');
+const { authenticateUser, authenticateDevice, authenticateService } = require('./middleware');
 const { compareCredentials, generateAuthToken } = require('./user');
-const { addDevice, findDevice,
-        compareDeviceCredentials, generateDeviceAuthToken } = require('./device');
+const { addDevice,
+        compareDeviceCredentials,
+        generateDeviceAuthToken } = require('./device');
+
+const { addService,
+        findService,
+        compareServiceCredentials,
+        generateServiceAuthToken } = require('./service');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -40,10 +46,17 @@ app.post('/device', authenticateUser, (req, res) => {
   res.send('feito');
 });
 
+app.post('/service', authenticateUser, (req, res) => {
+  const name = req.body.name;
+  const password = req.body.password;
+
+  addService({ name, password });
+
+  res.send('feito');
+});
+
 app.post('/device/login', (req, res) => {
-  debugger;
   compareDeviceCredentials(req.body.name, req.body.password).then((device) => {
-    debugger;
     const token = generateDeviceAuthToken(device);
     res.header('x-auth', token).send();
   }).catch((e) => {
@@ -63,12 +76,12 @@ app.get('/sockets', (req, res) => {
 
 require('socketio-auth')(io, {
   authenticate: function (socket, data, callback) {
-    const device = findDevice(data.username, data.password);
-
-    if (!device)  {
+    compareServiceCredentials(data.username, data.password).then(() => {
+      debugger;
+      return callback(null, true);
+    }).catch((e) => {
       return callback(new Error("User not found"));
-    }
-    return callback(null, true);
+    });
   }
 });
 
