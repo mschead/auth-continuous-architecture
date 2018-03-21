@@ -12,7 +12,7 @@ jQuery('#login').on('click', function (e) {
       alert("Connected!");
       
       _socket.on('newValue', (data) => {
-        console.log(`Got ${data.value} from device!`);
+        console.log(`Got ${data} from device!`);
       });
 
     });
@@ -26,9 +26,13 @@ jQuery('#login').on('click', function (e) {
 
 
 jQuery('#join').on('click', function (e) {
-  var device = { name: jQuery('#device').val() } 
+  var device = { name: jQuery('#deviceName').val() }
   
-  _socket.emit('join', device, function () {
-    console.log('join successful')
+  _socket.emit('join', device, function (e) {
+    if (e) {
+      console.log(e);
+    } else {
+      console.log('join successful')
+    }
   });
 });

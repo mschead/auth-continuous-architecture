@@ -18,8 +18,9 @@ $('#login').on('click', function (e) {
     headers: {
       'Content-Type': 'application/json'
     },
-    success: function (data) {
+    success: function (data, status, xhr) {
       alert("Success in login!");
+      _token = xhr.getResponseHeader('x-auth');
     },
     error: function (data){
       alert("Error sending data!");
@@ -31,18 +32,20 @@ $('#login').on('click', function (e) {
 $('#send').on('click', function (e) {
   alert("Sending data ...");
   
+  var data = {
+    value: $('#deviceValue').val()
+  };
+
   $.ajax({
     url: '/device/send',
     type: 'post',
-    data: {
-      value: $('#deviceValue').val()
-    },
+    data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
       'x-auth': _token
     },
-    dataType: 'json',
-    success: function (data) {     
+    success: function (data) {
+      alert("Data has been sent!");
     },
     error: function (data) {
       alert("Error sending data: " + data);        
