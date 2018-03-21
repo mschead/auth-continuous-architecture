@@ -31,7 +31,7 @@ const compareCredentials = (email, password) => {
 
 const generateAuthToken = () => {
   var access = 'auth';
-  var token = jwt.sign({ _id: user._id, access }, JWT_SECRET);
+  var token = jwt.sign({ _id: user._id, access }, JWT_SECRET).toString();
   user.tokenData = { access, token };
   return token;
 };

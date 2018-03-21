@@ -25,7 +25,9 @@ const addService = (service) => {
 };
 
 const findServiceByToken = (token) => {
-  return services.find((service) => service.token === token);
+  return services.find((service) => {
+    return service.tokens.find((tokenObject) => tokenObject.token === token);
+  });
 }
 
 const compareServiceCredentials = (name, password) => {

@@ -9,7 +9,8 @@ const { authenticateUser, authenticateDevice, authenticateService } = require('.
 const { compareCredentials, generateAuthToken } = require('./user');
 const { addDevice,
         compareDeviceCredentials,
-        generateDeviceAuthToken } = require('./device');
+        generateDeviceAuthToken,
+        addServiceToDevice } = require('./device');
 
 const { addService,
         findService,
@@ -65,19 +66,10 @@ app.post('/device/login', (req, res) => {
   
 });
 
-//app.post('/device/send', authenticateDevice, (req, req) => {
-//  // refresh value
-//});
-
-app.get('/sockets', (req, res) => {
-  console.log(io.sockets.sockets);
-  res.send();
-});
 
 require('socketio-auth')(io, {
   authenticate: function (socket, data, callback) {
     compareServiceCredentials(data.username, data.password).then(() => {
-      debugger;
       return callback(null, true);
     }).catch((e) => {
       return callback(new Error("User not found"));
@@ -89,16 +81,24 @@ io.on('connection', (socket) => {
 
   socket.on('join', (params, callback) => {
 
-    // generate a id for each device
-    socket.join(params.name);
+    try {
+      addServiceToDevice(params.name);
+      socket.join(params.name);
+    } catch (e) {
+      callback(e.message);
+    }
 
     callback();
   });
 
-  socket.on('createValue', (data) => {
-    socket.broadcast.emit('newValue', data);
-    console.log(`Got ${data.value} from device!`);
-  });
+});
+
+app.post('/device/send', authenticateDevice, (req, res) => {
+  const device = req.device;
+  const value = req.body.value
+
+  // put the name of device
+  io.to(req.device.name).emit('newValue', value);
 
 });
 
