@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const { authenticateUser, authenticateDevice, authenticateService } = require('./middleware');
 const { compareCredentials, generateAuthToken } = require('./user');
+
 const { addDevice,
         compareDeviceCredentials,
         generateDeviceAuthToken,
@@ -42,9 +43,13 @@ app.post('/device', authenticateUser, (req, res) => {
   const name = req.body.name;
   const password = req.body.password;
 
-  addDevice({ name, password });
+  addDevice({ name, password }).then((device) => {
+    res.send('Success');
+  }).catch((e) => {
+    debugger;
+    res.status(400).send(e);
+  });
 
-  res.send('feito');
 });
 
 app.post('/service', authenticateUser, (req, res) => {
