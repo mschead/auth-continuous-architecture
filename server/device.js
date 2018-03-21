@@ -18,16 +18,21 @@ const hashPassword = (device) => {
   });
 }
 
-const addDevice = (device) => {
-  hashPassword(device);
-  device.tokens = []
-  device.services = []
-  devices.push(device);
-};
+const addDevice = (newDevice) => {
+  return findOne(newDevice.name).then((device) => {
 
-//refactor this
-const findDevice = (name, password) => {
-  return devices.find((device) => device.name === name && device.password === password);
+    if (device) {
+      return Promise.reject('Device already exists!');
+    }
+
+    hashPassword(newDevice);
+    newDevice.tokens = []
+    newDevice.services = []
+
+    devices.push(newDevice);
+
+  });
+
 };
 
 const addServiceToDevice = (name) => {
@@ -69,11 +74,7 @@ const compareDeviceCredentials = (name, password) => {
 const findOne = (name) => {
   return new Promise((resolve, reject) => {
     let device = devices.find((device) => device.name === name);
-    if (!device) {
-      reject();
-    } else {
-      resolve(device);
-    }
+    resolve(device);
   })
 };
 
@@ -99,7 +100,6 @@ const generateDeviceAuthToken = (device) => {
 
 module.exports = {
   addDevice,
-  findDevice,
   compareDeviceCredentials,
   generateDeviceAuthToken,
   addServiceToDevice,
