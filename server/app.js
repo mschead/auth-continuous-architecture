@@ -11,7 +11,8 @@ const { compareCredentials, generateAuthToken } = require('./user');
 const { addDevice,
         compareDeviceCredentials,
         generateDeviceAuthToken,
-        addServiceToDevice } = require('./device');
+        addServiceToDevice,
+        stopListeningDevice } = require('./device');
 
 const { addService,
         findService,
@@ -91,6 +92,18 @@ io.on('connection', (socket) => {
     try {
       addServiceToDevice(params.name);
       socket.join(params.name);
+    } catch (e) {
+      callback(e.message);
+    }
+
+    callback();
+  });
+
+  socket.on('leave', (params, callback) => {
+
+    try {
+      stopListeningDevice(params.name);
+      socket.leave(params.name);
     } catch (e) {
       callback(e.message);
     }

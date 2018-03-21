@@ -19,7 +19,7 @@ const hashPassword = (service) => {
 }
 
 const addService = (newService) => {
-  
+
   return findOne(newService.name).then((service) => {
 
     if (service) {

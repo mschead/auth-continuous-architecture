@@ -36,3 +36,15 @@ jQuery('#join').on('click', function (e) {
     }
   });
 });
+
+jQuery('#leave').on('click', function (e) {
+  var device = { name: jQuery('#deviceName').val() }
+
+  _socket.emit('leave', device, function (e) {
+    if (e) {
+      console.log(e);
+    } else {
+      console.log('join successful')
+    }
+  });
+});
