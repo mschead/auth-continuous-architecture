@@ -45,6 +45,16 @@ const addServiceToDevice = (name) => {
   save(device);
 }
 
+const stopListeningDevice = (name) => {
+  const device = devices.find((device) => device.name === name);
+  if (!device) {
+    throw new Error('No device found');
+  }
+
+  device.services.filter((serviceName) => serviceName !== name);
+  save(device);
+}
+
 const findDeviceByToken = (token) => {
   return devices.find((device) => {
     return device.tokens.find((tokenObject) => tokenObject.token === token);
@@ -103,6 +113,7 @@ module.exports = {
   compareDeviceCredentials,
   generateDeviceAuthToken,
   addServiceToDevice,
-  findDeviceByToken
+  stopListeningDevice,
+  findDeviceByToken,
 }
 
