@@ -18,10 +18,22 @@ const hashPassword = (service) => {
   });
 }
 
-const addService = (service) => {
-  hashPassword(service);
-  service.tokens = []
-  services.push(service);
+const addService = (newService) => {
+  
+  return findOne(newService.name).then((service) => {
+
+    if (service) {
+      return Promise.reject('Service already exists!');
+    }
+
+    hashPassword(newService);
+    newService.tokens = []
+    newService.services = []
+  
+    services.push(newService);
+
+  });
+  
 };
 
 const findServiceByToken = (token) => {
@@ -55,23 +67,9 @@ const compareServiceCredentials = (name, password) => {
 const findOne = (name) => {
   return new Promise((resolve, reject) => {
     let service = services.find((service) => service.name === name);
-    if (!service) {
-      reject();
-    } else {
-      resolve(service);
-    }
-  })
+    resolve(service);
+  });
 };
-
-/* const findOne = (name) => {
-  return new Promise((resolve, reject) => {
-    let device = devices.find((device) => device.name === name);
-    if (!device) {
-      reject();
-    }
-    resolve(device);
-  })
-}; */
 
 const save = (service) => {
   services = services.map((newService) => {

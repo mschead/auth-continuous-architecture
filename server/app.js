@@ -46,7 +46,6 @@ app.post('/device', authenticateUser, (req, res) => {
   addDevice({ name, password }).then((device) => {
     res.send('Success');
   }).catch((e) => {
-    debugger;
     res.status(400).send(e);
   });
 
@@ -56,9 +55,12 @@ app.post('/service', authenticateUser, (req, res) => {
   const name = req.body.name;
   const password = req.body.password;
 
-  addService({ name, password });
+  addService({ name, password }).then((service) => {
+    res.send('Success');
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
 
-  res.send('feito');
 });
 
 app.post('/device/login', (req, res) => {
