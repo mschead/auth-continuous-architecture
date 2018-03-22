@@ -27,7 +27,6 @@ const addDevice = (newDevice) => {
 
     hashPassword(newDevice);
     newDevice.tokens = []
-    newDevice.services = []
 
     devices.push(newDevice);
 
@@ -35,25 +34,6 @@ const addDevice = (newDevice) => {
 
 };
 
-const addServiceToDevice = (name) => {
-  const device = devices.find((device) => device.name === name);
-  if (!device) {
-    throw new Error('No device found');
-  }
-
-  device.services.push(name);
-  save(device);
-}
-
-const stopListeningDevice = (name) => {
-  const device = devices.find((device) => device.name === name);
-  if (!device) {
-    throw new Error('No device found');
-  }
-
-  device.services.filter((serviceName) => serviceName !== name);
-  save(device);
-}
 
 const findDeviceByToken = (token) => {
   return devices.find((device) => {
@@ -112,8 +92,6 @@ module.exports = {
   addDevice,
   compareDeviceCredentials,
   generateDeviceAuthToken,
-  addServiceToDevice,
-  stopListeningDevice,
   findDeviceByToken,
 }
 
