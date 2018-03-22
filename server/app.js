@@ -1,9 +1,13 @@
+require('./config');
+const { mongoose } = require('./mongoose');
+const { Device } = require('./device');
+
 const path = require('path');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
+
 
 const { authenticateUser, authenticateDevice, authenticateService } = require('./middleware');
 const { compareCredentials, generateAuthToken } = require('./user');
@@ -30,6 +34,19 @@ var io = socketIO(server);
 app.use(bodyParser.json());
 app.use(express.static(publicPath));
 
+app.get('/mtest', async (req, res) => {
+  try {
+    const device = new Device({
+      name: 'oleole',
+      password: 'sdofjworj3928jfej'
+    });
+
+    await device.save();
+    res.send('foi');
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
 
 app.post('/user/login', (req, res) => {
 
