@@ -28,13 +28,35 @@ const addService = (newService) => {
 
     hashPassword(newService);
     newService.tokens = []
-    newService.services = []
+    newService.devices = ['laser']
   
     services.push(newService);
 
   });
   
 };
+
+const addDeviceToService = (nameService, nameDevice) => {
+  findOne(nameService).then((service) => {
+    if (!service) {
+      throw new Error('No service found');
+    }
+
+    service.devices.push(nameDevice);
+    save(service);
+  });
+}
+
+const removeDeviceFromService = (nameService, nameDevice) => {
+  findOne(nameService).then((service) => {
+    if (!service) {
+      throw new Error('No service found');
+    }
+
+    service.devices.filter((name) => name !== nameDevice);
+    save(service);
+  });
+}
 
 const findServiceByToken = (token) => {
   return services.find((service) => {
@@ -81,17 +103,9 @@ const save = (service) => {
 
 };
 
-/* const generateServiceAuthToken = (service) => {
-  var access = 'auth';
-  var token = jwt.sign({ _id: service.name, access }, JWT_SECRET).toString();
-
-  service.tokens = service.tokens.concat([{ access, token }]);
-
-  save(service);
-  return service;
-}; */
-
 module.exports = {
   addService,
-  compareServiceCredentials
+  compareServiceCredentials,
+  addDeviceToService,
+  removeDeviceFromService
 }

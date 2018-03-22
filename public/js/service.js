@@ -32,7 +32,7 @@ jQuery('#join').on('click', function (e) {
     if (e) {
       console.log(e);
     } else {
-      console.log('join successful')
+      alert("Join successful!")
     }
   });
 });
@@ -44,7 +44,7 @@ jQuery('#leave').on('click', function (e) {
     if (e) {
       console.log(e);
     } else {
-      console.log('join successful')
+      alert("Exit successful!");
     }
   });
 });

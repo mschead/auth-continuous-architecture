@@ -16,6 +16,8 @@ const { addDevice,
 
 const { addService,
         findService,
+        addDeviceToService,
+        removeDeviceFromService,
         compareServiceCredentials,
         generateServiceAuthToken } = require('./service');
 
@@ -77,7 +79,9 @@ app.post('/device/login', (req, res) => {
 
 require('socketio-auth')(io, {
   authenticate: function (socket, data, callback) {
-    compareServiceCredentials(data.username, data.password).then(() => {
+    compareServiceCredentials(data.username, data.password).then((service) => {
+      socket.name = service.name;
+      service.devices.forEach((deviceName) => socket.join(deviceName));
       return callback(null, true);
     }).catch((e) => {
       return callback(new Error("User not found"));
@@ -90,7 +94,7 @@ io.on('connection', (socket) => {
   socket.on('join', (params, callback) => {
 
     try {
-      addServiceToDevice(params.name);
+      addDeviceToService(socket.name, params.name)
       socket.join(params.name);
     } catch (e) {
       callback(e.message);
@@ -102,7 +106,7 @@ io.on('connection', (socket) => {
   socket.on('leave', (params, callback) => {
 
     try {
-      stopListeningDevice(params.name);
+      removeDeviceFromService(socket.name, params.name)
       socket.leave(params.name);
     } catch (e) {
       callback(e.message);
