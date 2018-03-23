@@ -28,6 +28,7 @@ const addService = (newService) => {
 
     hashPassword(newService);
     newService.tokens = []
+    // change here!
     newService.devices = ['laser']
   
     services.push(newService);
