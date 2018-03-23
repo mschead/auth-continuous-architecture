@@ -19,11 +19,11 @@ $('#login').on('click', function (e) {
       'Content-Type': 'application/json'
     },
     success: function (data, status, xhr) {
-      alert("Success in login!");
       _token = xhr.getResponseHeader('x-auth');
+      alert("Success in login!");
     },
     error: function (data){
-      alert("Error sending data!");
+      alert("Error trying to login!");
     }
   });
 

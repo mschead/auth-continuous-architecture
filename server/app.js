@@ -12,8 +12,7 @@ const bodyParser = require('body-parser');
 const { authenticateUser, authenticateDevice, authenticateService } = require('./middleware');
 const { compareCredentials, generateAuthToken } = require('./user');
 
-const { addDevice,
-        compareDeviceCredentials,
+const { compareDeviceCredentials,
         generateDeviceAuthToken,
         addServiceToDevice,
         stopListeningDevice } = require('./device');
@@ -34,19 +33,6 @@ var io = socketIO(server);
 app.use(bodyParser.json());
 app.use(express.static(publicPath));
 
-app.get('/mtest', async (req, res) => {
-  try {
-    const device = new Device({
-      name: 'oleole',
-      password: 'sdofjworj3928jfej'
-    });
-
-    await device.save();
-    res.send('foi');
-  } catch (e) {
-    res.status(400).send(e);
-  }
-});
 
 app.post('/user/login', (req, res) => {
 
@@ -63,8 +49,9 @@ app.post('/device', authenticateUser, (req, res) => {
   const name = req.body.name;
   const password = req.body.password;
 
-  addDevice({ name, password }).then((device) => {
-    res.send('Success');
+  const device = new Device({ name, password });
+  device.save().then((device) => {
+    res.send('Success!');
   }).catch((e) => {
     res.status(400).send(e);
   });
@@ -76,21 +63,23 @@ app.post('/service', authenticateUser, (req, res) => {
   const password = req.body.password;
 
   addService({ name, password }).then((service) => {
-    res.send('Success');
+    res.send('Success!');
   }).catch((e) => {
     res.status(400).send(e);
   });
 
 });
 
-app.post('/device/login', (req, res) => {
-  compareDeviceCredentials(req.body.name, req.body.password).then((device) => {
-    const token = generateDeviceAuthToken(device);
-    res.header('x-auth', token).send();
-  }).catch((e) => {
+app.post('/device/login', async (req, res) => {
+  try {
+    const device = await Device.findByCredentials(req.body.name, req.body.password);
+    debugger;
+    const token = await device.generateAuthToken();
+    res.header('x-auth', token).send('Success!');
+  } catch (e) {
+    debugger;
     res.status(400).send(e);
-  });
-  
+  }
 });
 
 

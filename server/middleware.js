@@ -1,5 +1,5 @@
 const { user } = require('./user');
-const { device, findDeviceByToken } = require('./device');
+const { Device, findDeviceByToken } = require('./device');
 
 const authenticateUser = (req, res, next) => {
   const token = req.header('x-auth');
@@ -15,15 +15,19 @@ const authenticateUser = (req, res, next) => {
 
 const authenticateDevice = (req, res, next) => {
   const token = req.header('x-auth');
-  const device = findDeviceByToken(token);
+  debugger;
+  Device.findByToken(token).then((device) => {
+    debugger;
+    if (!device) {
+      return Promise.reject();
+    }
 
-  if (device) {
     req.device = device;
     req.token = token;
     next();
-  } else {
+  }).catch((e) => {
     res.status(401).send();
-  }
+  });
 }
 
 module.exports = { authenticateUser, authenticateDevice };
