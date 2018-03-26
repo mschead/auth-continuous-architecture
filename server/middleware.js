@@ -15,9 +15,7 @@ const authenticateUser = (req, res, next) => {
 
 const authenticateDevice = (req, res, next) => {
   const token = req.header('x-auth');
-  debugger;
   Device.findByToken(token).then((device) => {
-    debugger;
     if (!device) {
       return Promise.reject();
     }

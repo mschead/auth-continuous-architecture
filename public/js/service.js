@@ -12,7 +12,7 @@ jQuery('#login').on('click', function (e) {
       alert("Connected!");
       
       _socket.on('newValue', (data) => {
-        console.log(`Got ${data} from device!`);
+        alert(`Got ${data} from device!`);
       });
 
     });
@@ -30,7 +30,7 @@ jQuery('#join').on('click', function (e) {
   
   _socket.emit('join', device, function (e) {
     if (e) {
-      console.log(e);
+      alert(e);
     } else {
       alert("Join successful!")
     }
@@ -42,7 +42,7 @@ jQuery('#leave').on('click', function (e) {
 
   _socket.emit('leave', device, function (e) {
     if (e) {
-      console.log(e);
+      alert(e);
     } else {
       alert("Exit successful!");
     }
