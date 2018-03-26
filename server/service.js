@@ -1,73 +1,50 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// service = {
-//  name: 'reconhecedor_facial',
-//  password: 'fsflkjsfqwroiurwjfke'
-// }
+const mongoose = require('mongoose');
 
 const JWT_SECRET = 'lalala765';
 
-let services = [];
+const { Device } = require('./device');
 
-const hashPassword = (service) => {
-  bcrypt.genSalt(10, (err, salt) => {
-    bcrypt.hash(service.password, salt, (err, hash) => {
-      service.password = hash
+const ServiceSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 5,
+    unique: true
+  },
+  password: {
+    type: String,
+    require: true,
+    minlength: 6
+  },
+  devices: {
+    type: [String]
+  }
+});
+
+
+ServiceSchema.pre('save', function (next) {
+  const service = this;
+
+  if (service.isModified('password')) {
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(service.password, salt, (err, hash) => {
+        service.password = hash;
+        next();
+      });
     });
-  });
-}
+  } else {
+    next();
+  }
+});
 
-const addService = (newService) => {
+ServiceSchema.statics.findByCredentials = function (name, password) {
+  var Service = this;
 
-  return findOne(newService.name).then((service) => {
-
-    if (service) {
-      return Promise.reject('Service already exists!');
-    }
-
-    hashPassword(newService);
-    newService.tokens = []
-    // change here!
-    newService.devices = ['laser']
-  
-    services.push(newService);
-
-  });
-  
-};
-
-const addDeviceToService = (nameService, nameDevice) => {
-  findOne(nameService).then((service) => {
-    if (!service) {
-      throw new Error('No service found');
-    }
-
-    service.devices.push(nameDevice);
-    save(service);
-  });
-}
-
-const removeDeviceFromService = (nameService, nameDevice) => {
-  findOne(nameService).then((service) => {
-    if (!service) {
-      throw new Error('No service found');
-    }
-
-    service.devices.filter((name) => name !== nameDevice);
-    save(service);
-  });
-}
-
-const findServiceByToken = (token) => {
-  return services.find((service) => {
-    return service.tokens.find((tokenObject) => tokenObject.token === token);
-  });
-}
-
-const compareServiceCredentials = (name, password) => {
-
-  return findOne(name).then((service) => {
+  return Service.findOne({ name }).then((service) => {
     if (!service) {
       return new Promise.reject();
     }
@@ -82,31 +59,52 @@ const compareServiceCredentials = (name, password) => {
       });
     });
   }).catch((e) => {
-    throw new Error('error');
-  });
-
-}
-
-const findOne = (name) => {
-  return new Promise((resolve, reject) => {
-    let service = services.find((service) => service.name === name);
-    resolve(service);
+    throw new Error('Error trying to login!');
   });
 };
 
-const save = (service) => {
-  services = services.map((newService) => {
-    if (service.name === newService.name) {
-      return service;
+ServiceSchema.statics.addDeviceToService = function (nameService, nameDevice) {
+  var Service = this;
+
+  return Service.findOne({ 'name': nameService }).then((service) => {
+    if (!service) {
+      throw new Error('No service found');
     }
-    return newService;
-  });
 
+    return Device.findOne({ 'name': nameDevice }).then((device) => {
+      if (!device) {
+        throw new Error('No device found');
+      }
+
+      service.devices = service.devices.concat(nameDevice);
+      service.save().then((service) => {
+        return service;
+      });
+    });
+  });
 };
 
-module.exports = {
-  addService,
-  compareServiceCredentials,
-  addDeviceToService,
-  removeDeviceFromService
-}
+ServiceSchema.statics.removeDeviceFromService = function (nameService, nameDevice) {
+  var Service = this;
+
+  return Service.findOne({ 'name': nameService }).then((service) => {
+    if (!service) {
+      throw new Error('No service found');
+    }
+
+    return Device.findOne({ 'name': nameDevice }).then((device) => {
+      if (!device) {
+        throw new Error('No device found');
+      }
+
+      service.devices = service.devices.filter((name) => name !== nameDevice);
+      service.save().then((service) => {
+        return service;
+      });
+    });
+  });
+};
+
+const Service = mongoose.model('Service', ServiceSchema);
+
+module.exports = { Service };

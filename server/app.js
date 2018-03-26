@@ -1,6 +1,5 @@
 require('./config');
 const { mongoose } = require('./mongoose');
-const { Device } = require('./device');
 
 const path = require('path');
 const http = require('http');
@@ -8,21 +7,17 @@ const express = require('express');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 
-
 const { authenticateUser, authenticateDevice, authenticateService } = require('./middleware');
 const { compareCredentials, generateAuthToken } = require('./user');
 
-const { compareDeviceCredentials,
-        generateDeviceAuthToken,
-        addServiceToDevice,
-        stopListeningDevice } = require('./device');
+const { Device } = require('./device');
 
-const { addService,
-        findService,
-        addDeviceToService,
+const { addDeviceToService,
         removeDeviceFromService,
         compareServiceCredentials,
-        generateServiceAuthToken } = require('./service');
+        Service } = require('./service');
+
+const { NDC } = require('./ndc');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -62,7 +57,8 @@ app.post('/service', authenticateUser, (req, res) => {
   const name = req.body.name;
   const password = req.body.password;
 
-  addService({ name, password }).then((service) => {
+  const service = new Service({ name, password });
+  service.save().then((service) => {
     res.send('Success!');
   }).catch((e) => {
     res.status(400).send(e);
@@ -73,19 +69,18 @@ app.post('/service', authenticateUser, (req, res) => {
 app.post('/device/login', async (req, res) => {
   try {
     const device = await Device.findByCredentials(req.body.name, req.body.password);
-    debugger;
     const token = await device.generateAuthToken();
     res.header('x-auth', token).send('Success!');
   } catch (e) {
-    debugger;
     res.status(400).send(e);
   }
 });
 
 
 require('socketio-auth')(io, {
+
   authenticate: function (socket, data, callback) {
-    compareServiceCredentials(data.username, data.password).then((service) => {
+    Service.findByCredentials(data.username, data.password).then((service) => {
       socket.name = service.name;
       service.devices.forEach((deviceName) => socket.join(deviceName));
       return callback(null, true);
@@ -98,27 +93,21 @@ require('socketio-auth')(io, {
 io.on('connection', (socket) => {
 
   socket.on('join', (params, callback) => {
-
-    try {
-      addDeviceToService(socket.name, params.name)
+    Service.addDeviceToService(socket.name, params.name).then((service) => {
       socket.join(params.name);
-    } catch (e) {
+      callback();
+    }).catch((e) => {
       callback(e.message);
-    }
-
-    callback();
+    });
   });
 
   socket.on('leave', (params, callback) => {
-
-    try {
-      removeDeviceFromService(socket.name, params.name)
+    Service.removeDeviceFromService(socket.name, params.name).then((service) => {
       socket.leave(params.name);
-    } catch (e) {
+      callback();
+    }).catch((e) => {
       callback(e.message);
-    }
-
-    callback();
+    });
   });
 
 });
@@ -127,8 +116,14 @@ app.post('/device/send', authenticateDevice, (req, res) => {
   const device = req.device;
   const value = req.body.value
 
-  // put the name of device
-  io.to(req.device.name).emit('newValue', value);
+  const newNDC = new NDC({
+    deviceName: device.name,
+    data: value
+  });
+
+  newNDC.save((ndc) => {
+    io.to(req.device.name).emit('newValue', value);
+  });
 
 });
 
