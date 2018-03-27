@@ -1,8 +1,8 @@
-require('./config');
+const { options} = require('./configSSL');
 const { mongoose } = require('./mongoose');
 
 const path = require('path');
-const http = require('http');
+const https = require('https');
 const express = require('express');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
@@ -22,12 +22,11 @@ const { NDC } = require('./ndc');
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 const app = express();
-var server = http.createServer(app);
+var server = https.createServer(options, app);
 var io = socketIO(server);
 
 app.use(bodyParser.json());
 app.use(express.static(publicPath));
-
 
 app.post('/user/login', (req, res) => {
 
