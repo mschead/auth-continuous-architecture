@@ -1,5 +1,5 @@
 const { user } = require('./user');
-const { Device, findDeviceByToken } = require('./device');
+const { Device } = require('./device');
 
 const authenticateUser = (req, res, next) => {
   const token = req.header('x-auth');

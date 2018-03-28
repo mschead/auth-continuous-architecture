@@ -1,32 +1,12 @@
-const { options} = require('./configSSL');
+const { app, io, server } = require('./config');
 const { mongoose } = require('./mongoose');
 
-const path = require('path');
-const https = require('https');
-const express = require('express');
-const socketIO = require('socket.io');
-const bodyParser = require('body-parser');
-
-const { authenticateUser, authenticateDevice, authenticateService } = require('./middleware');
-const { compareCredentials, generateAuthToken } = require('./user');
+const { authenticateUser, authenticateDevice } = require('./middleware');
+const { compareCredentials, generateAuthToken, removeToken } = require('./user');
 
 const { Device } = require('./device');
-
-const { addDeviceToService,
-        removeDeviceFromService,
-        compareServiceCredentials,
-        Service } = require('./service');
-
+const { Service } = require('./service');
 const { NDC } = require('./ndc');
-
-const publicPath = path.join(__dirname, '../public');
-const port = process.env.PORT || 3000;
-const app = express();
-var server = https.createServer(options, app);
-var io = socketIO(server);
-
-app.use(bodyParser.json());
-app.use(express.static(publicPath));
 
 app.post('/user/login', (req, res) => {
 
@@ -37,6 +17,11 @@ app.post('/user/login', (req, res) => {
     res.status(400).send(e);
   });
 
+});
+
+app.post('/user/logout', authenticateUser, (req, res) => {
+  removeToken(req.token);
+  res.status(200).send();
 });
 
 app.post('/device', authenticateUser, (req, res) => {
@@ -126,6 +111,6 @@ app.post('/device/send', authenticateDevice, (req, res) => {
 
 });
 
-server.listen(port, () => {
-  console.log(`Server is up on port ${port}`);
+server.listen(process.env.PORT, () => {
+  console.log(`Server is up on port ${process.env.PORT}`);
 });

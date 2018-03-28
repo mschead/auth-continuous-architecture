@@ -5,8 +5,7 @@ const JWT_SECRET = 'lalala765';
 const PASSWORD_NOT_HASHED = '123abc';
 
 let user = {
-  _id: '2018yes',
-  // email: 'marcos@gmail.com',
+  _id: 'flksdi23u48kjsdfsn0',
   password: undefined,
   tokenData: {}
 };
@@ -36,8 +35,13 @@ const generateAuthToken = () => {
   return token;
 };
 
+const removeToken = () => {
+  user.tokenData = {}
+};
+
 module.exports = {
   user,
   compareCredentials,
-  generateAuthToken
+  generateAuthToken,
+  removeToken
 };
