@@ -1,16 +1,19 @@
-const { user } = require('./user');
+const { findByToken } = require('./user');
 const { Device } = require('./device');
 
 const authenticateUser = (req, res, next) => {
   const token = req.header('x-auth');
+  findByToken(token).then((user) => {
+    if (!user) {
+      return Promise.reject();
+    }
 
-  if (user.tokenData.token === token) {
     req.user = user;
     req.token = token;
     next();
-  } else {
+  }).catch((e) => {
     res.status(401).send();
-  }
+  });
 };
 
 const authenticateDevice = (req, res, next) => {

@@ -28,6 +28,25 @@ const compareCredentials = (email, password) => {
   });
 }
 
+const findByToken = (token) => {
+  var decoded;
+
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (e) {
+    return Promise.reject();
+  }
+
+  return new Promise((resolve, reject) => {
+    if (user._id === decoded._id && user.tokenData.token === token && user.tokenData.access === 'auth') {
+      resolve(user);
+    } else {
+      resolve();
+    }
+  });
+
+};
+
 const generateAuthToken = () => {
   var access = 'auth';
   var token = jwt.sign({ _id: user._id, access }, JWT_SECRET).toString();
@@ -40,7 +59,7 @@ const removeToken = () => {
 };
 
 module.exports = {
-  user,
+  findByToken,
   compareCredentials,
   generateAuthToken,
   removeToken
