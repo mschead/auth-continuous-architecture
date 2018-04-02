@@ -2,3 +2,4 @@ node_modules/
 labsec.crt
 cert-chain.crt
 private-key.pem
+.vscode/
