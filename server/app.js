@@ -1,5 +1,5 @@
+require('./mongoose');
 const { app, io, server } = require('./config');
-const { mongoose } = require('./mongoose');
 
 const { authenticateUser, authenticateDevice } = require('./middleware');
 const { compareCredentials, generateAuthToken, removeToken } = require('./user');
@@ -29,7 +29,7 @@ app.post('/device', authenticateUser, (req, res) => {
   const password = req.body.password;
 
   const device = new Device({ name, password });
-  device.save().then((device) => {
+  device.save().then(() => {
     res.send('Success!');
   }).catch((e) => {
     res.status(400).send(e);
@@ -42,7 +42,7 @@ app.post('/service', authenticateUser, (req, res) => {
   const password = req.body.password;
 
   const service = new Service({ name, password });
-  service.save().then((service) => {
+  service.save().then(() => {
     res.send('Success!');
   }).catch((e) => {
     res.status(400).send(e);
@@ -68,7 +68,7 @@ require('socketio-auth')(io, {
       socket.name = service.name;
       service.devices.forEach((deviceName) => socket.join(deviceName));
       return callback(null, true);
-    }).catch((e) => {
+    }).catch(() => {
       return callback(new Error("User not found"));
     });
   }
@@ -77,7 +77,7 @@ require('socketio-auth')(io, {
 io.on('connection', (socket) => {
 
   socket.on('join', (params, callback) => {
-    Service.addDeviceToService(socket.name, params.name).then((service) => {
+    Service.addDeviceToService(socket.name, params.name).then(() => {
       socket.join(params.name);
       callback();
     }).catch((e) => {
@@ -86,7 +86,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('leave', (params, callback) => {
-    Service.removeDeviceFromService(socket.name, params.name).then((service) => {
+    Service.removeDeviceFromService(socket.name, params.name).then(() => {
       socket.leave(params.name);
       callback();
     }).catch((e) => {
@@ -95,6 +95,7 @@ io.on('connection', (socket) => {
   });
 
 });
+
 
 app.post('/device/send', authenticateDevice, (req, res) => {
   const device = req.device;
@@ -105,12 +106,11 @@ app.post('/device/send', authenticateDevice, (req, res) => {
     data: value
   });
 
-  newNDC.save((ndc) => {
+  newNDC.save(() => {
     io.to(req.device.name).emit('newValue', value);
+    res.status(200).send('Success');
   });
 
 });
 
-server.listen(process.env.PORT, () => {
-  console.log(`Server is up on port ${process.env.PORT}`);
-});
+server.listen(process.env.PORT);

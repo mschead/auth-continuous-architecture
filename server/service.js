@@ -1,9 +1,5 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
 const mongoose = require('mongoose');
-
-const JWT_SECRET = 'lalala765';
 
 const { Device } = require('./device');
 
@@ -58,7 +54,7 @@ ServiceSchema.statics.findByCredentials = function (name, password) {
         }
       });
     });
-  }).catch((e) => {
+  }).catch(() => {
     throw new Error('Error trying to login!');
   });
 };

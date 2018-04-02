@@ -79,7 +79,7 @@ DeviceSchema.methods.generateAuthToken = function () {
 
   device.tokens = device.tokens.concat([{ access, token }]);
 
-  return device.save().then((device) => {
+  return device.save().then(() => {
     return token;
   });
 };
