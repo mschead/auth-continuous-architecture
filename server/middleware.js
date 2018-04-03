@@ -27,7 +27,7 @@ const authenticateDevice = (req, res, next) => {
     req.token = token;
     next();
   }).catch((e) => {
-    res.status(401).send(e.message);
+    res.status(401).send(e);
   });
 }
 

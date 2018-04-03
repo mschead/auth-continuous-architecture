@@ -3,7 +3,7 @@ var _socket;
 jQuery('#login').on('click', function (e) {
   alert("Connecting to socket");
       
-  _socket = io.connect('localhost:3000');
+  _socket = io.connect('localhost:8080');
   _socket.on('connect', function(){
     
     _socket.emit('authentication', {username: jQuery('#username').val(), password: jQuery('#password').val()});

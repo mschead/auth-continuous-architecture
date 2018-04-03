@@ -9,7 +9,6 @@ const { Service } = require('./service');
 const { NDC } = require('./ndc');
 
 app.post('/user/login', (req, res) => {
-
   compareCredentials(req.body.email, req.body.password).then(() => {
     const token = generateAuthToken();
     res.header('x-auth', token).send();
@@ -19,7 +18,7 @@ app.post('/user/login', (req, res) => {
 
 });
 
-app.post('/user/logout', authenticateUser, (req, res) => {
+app.delete('/user/logout', authenticateUser, (req, res) => {
   removeToken(req.token);
   res.status(200).send();
 });
@@ -60,6 +59,14 @@ app.post('/device/login', async (req, res) => {
   }
 });
 
+app.delete('/device/logout', authenticateDevice, async (req, res) => {
+  try {
+    await req.device.removeToken(req.token);
+    res.status(200).send();
+  } catch (e) {
+    res.status(400).send();
+  }
+});
 
 require('socketio-auth')(io, {
 
