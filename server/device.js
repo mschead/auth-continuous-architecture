@@ -101,6 +101,18 @@ DeviceSchema.statics.findByToken = function (token) {
   });
 };
 
+DeviceSchema.methods.removeToken = function (token) {
+  const device = this;
+
+  return device.update({
+    $pull: {
+      tokens: {
+        token
+      }
+    }
+  });
+};
+
 const Device = mongoose.model('Device', DeviceSchema);
 
 module.exports = { Device };
