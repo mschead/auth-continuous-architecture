@@ -1,7 +1,18 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-
 const mongoose = require('mongoose');
+
+const generateRandomNumber = (length) => {
+  return crypto.randomBytes(Math.ceil(length/2)).toString('hex').slice(0, length);
+}
+
+const JWT_SECRET_SIZE = 1024;
+const JWT_SECRET_TIME = 60 * 1000;
+let JWT_SECRET = generateRandomNumber(JWT_SECRET_SIZE);
+setInterval(() => {
+  JWT_SECRET = crypto.randomBytes(Math.ceil(JWT_SECRET_SIZE/2)).toString('hex').slice(0, JWT_SECRET_SIZE);
+}, JWT_SECRET_TIME);
 
 const DeviceSchema = new mongoose.Schema({
   name: {
@@ -10,10 +21,6 @@ const DeviceSchema = new mongoose.Schema({
     trim: true,
     minlength: 5,
     unique: true
-    // validate: {
-    //   validator: validator.isEmail,
-    //   message: '{VALUE} is not a valid email'
-    // }
   },
   password: {
     type: String,
@@ -31,9 +38,6 @@ const DeviceSchema = new mongoose.Schema({
     }
   }]
 });
-
-
-const JWT_SECRET = 'lalala765';
 
 
 DeviceSchema.pre('save', function (next) {
@@ -75,7 +79,9 @@ DeviceSchema.methods.generateAuthToken = function () {
   var device = this;
 
   const access = 'auth';
-  const token = jwt.sign({ _id: device._id.toHexString(), access }, JWT_SECRET).toString();
+  const token = jwt.sign({ _id: device._id.toHexString(), access },
+                          JWT_SECRET,
+                          { expiresIn: '12h'}).toString();
 
   device.tokens = device.tokens.concat([{ access, token }]);
 

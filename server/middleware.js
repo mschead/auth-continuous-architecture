@@ -1,9 +1,10 @@
-const { findByToken } = require('./user');
+const { User } = require('./user');
 const { Device } = require('./device');
 
 const authenticateUser = (req, res, next) => {
   const token = req.header('x-auth');
-  findByToken(token).then((user) => {
+
+  User.findByToken(token).then((user) => {
     if (!user) {
       return Promise.reject();
     }
@@ -12,7 +13,7 @@ const authenticateUser = (req, res, next) => {
     req.token = token;
     next();
   }).catch((e) => {
-    res.status(401).send(e.message);
+    res.status(401).send(e);
   });
 };
 
