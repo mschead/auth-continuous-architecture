@@ -2,25 +2,39 @@ require('./mongoose');
 const { app, io, server } = require('./config');
 
 const { authenticateUser, authenticateDevice } = require('./middleware');
-const { compareCredentials, generateAuthToken, removeToken } = require('./user');
+const { User } = require('./user');
 
 const { Device } = require('./device');
 const { Service } = require('./service');
 const { NDC } = require('./ndc');
 
-app.post('/user/login', (req, res) => {
-  compareCredentials(req.body.email, req.body.password).then(() => {
-    const token = generateAuthToken();
+app.post('/user/login', async (req, res) => {
+  try {
+    const user = await User.findByCredentials(req.body.username, req.body.password);
+    const token = await user.generateAuthToken();
     res.header('x-auth', token).send();
-  }).catch((e) => {
+  } catch (e) {
     res.status(400).send(e);
-  });
+  }
 
 });
 
-app.delete('/user/logout', authenticateUser, (req, res) => {
-  removeToken(req.token);
-  res.status(200).send();
+app.post('/user/newpassword', authenticateUser, async (req, res) => {
+  try {
+    await req.user.updatePassword(req.body.newPassword);
+    res.status(200).send();
+  } catch (e) {
+    res.status(400).send();
+  }
+});
+
+app.delete('/user/logout', authenticateUser, async (req, res) => {
+  try {
+    await req.user.removeToken(req.token);
+    res.status(200).send();
+  } catch (e) {
+    res.status(400).send();
+  }
 });
 
 app.post('/device', authenticateUser, (req, res) => {
