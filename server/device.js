@@ -8,7 +8,7 @@ const generateRandomNumber = (length) => {
 }
 
 const JWT_SECRET_SIZE = 1024;
-const JWT_SECRET_TIME = 60 * 1000;
+const JWT_SECRET_TIME = 24 * 60 * 1000;
 let JWT_SECRET = generateRandomNumber(JWT_SECRET_SIZE);
 setInterval(() => {
   JWT_SECRET = crypto.randomBytes(Math.ceil(JWT_SECRET_SIZE/2)).toString('hex').slice(0, JWT_SECRET_SIZE);
