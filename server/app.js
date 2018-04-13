@@ -135,3 +135,5 @@ app.post('/device/send', authenticateDevice, (req, res) => {
 });
 
 server.listen(process.env.PORT);
+
+module.exports = { app };
