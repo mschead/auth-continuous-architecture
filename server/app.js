@@ -22,9 +22,9 @@ app.post('/user/login', async (req, res) => {
 app.post('/user/newpassword', authenticateUser, async (req, res) => {
   try {
     await req.user.updatePassword(req.body.newPassword);
-    res.status(200).send();
+    res.status(200).send('Password updated!');
   } catch (e) {
-    res.status(400).send();
+    res.status(400).send(e);
   }
 });
 
@@ -122,14 +122,15 @@ app.post('/device/send', authenticateDevice, (req, res) => {
   const device = req.device;
   const value = req.body.value
 
-  const newNDC = new NDC({
-    deviceName: device.name,
-    data: value
-  });
+  const NDCData = {
+    device: device.name,
+    value: value
+  }
 
+  const newNDC = new NDC(NDCData);
   newNDC.save(() => {
-    io.to(req.device.name).emit('newValue', value);
-    res.status(200).send('Success');
+    io.to(req.device.name).emit('newValue', NDCData);
+    res.status(200).send('Success!');
   });
 
 });

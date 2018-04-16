@@ -9,9 +9,9 @@ const generateRandomNumber = (length) => {
 
 const JWT_SECRET_SIZE = 1024;
 const JWT_SECRET_TIME = 24 * 60 * 1000;
-let JWT_SECRET = generateRandomNumber(JWT_SECRET_SIZE);
+let JWT_SECRET_DEVICE = generateRandomNumber(JWT_SECRET_SIZE);
 setInterval(() => {
-  JWT_SECRET = crypto.randomBytes(Math.ceil(JWT_SECRET_SIZE/2)).toString('hex').slice(0, JWT_SECRET_SIZE);
+  JWT_SECRET_DEVICE = crypto.randomBytes(Math.ceil(JWT_SECRET_SIZE/2)).toString('hex').slice(0, JWT_SECRET_SIZE);
 }, JWT_SECRET_TIME);
 
 const DeviceSchema = new mongoose.Schema({
@@ -60,7 +60,7 @@ DeviceSchema.statics.findByCredentials = function (name, password) {
 
   return Device.findOne({ name }).then((device) => {
     if (!device) {
-      return new Promise.reject();
+      return Promise.reject(`Device doesn't exists`);
     }
 
     return new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ DeviceSchema.statics.findByCredentials = function (name, password) {
         if (res) {
           resolve(device);
         } else {
-          reject();
+          reject('Password incorrect');
         }
       });
     });
@@ -80,7 +80,7 @@ DeviceSchema.methods.generateAuthToken = function () {
 
   const access = 'auth';
   const token = jwt.sign({ _id: device._id.toHexString(), access },
-                          JWT_SECRET,
+                          JWT_SECRET_DEVICE,
                           { expiresIn: '12h'}).toString();
 
   device.tokens = device.tokens.concat([{ access, token }]);
@@ -95,7 +95,7 @@ DeviceSchema.statics.findByToken = function (token) {
   var decoded;
 
   try {
-    decoded = jwt.verify(token, JWT_SECRET);
+    decoded = jwt.verify(token, JWT_SECRET_DEVICE);
   } catch (e) {
     return Promise.reject();
   }
@@ -121,5 +121,5 @@ DeviceSchema.methods.removeToken = function (token) {
 
 const Device = mongoose.model('Device', DeviceSchema);
 
-module.exports = { Device };
+module.exports = { Device, JWT_SECRET_DEVICE };
 
