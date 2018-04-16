@@ -9,9 +9,9 @@ function generateRandomNumber(length) {
 
 const JWT_SECRET_SIZE = 1024;
 const JWT_SECRET_TIME = 24 * 60 * 1000;
-let JWT_SECRET = generateRandomNumber(JWT_SECRET_SIZE);
+let JWT_SECRET_USER = generateRandomNumber(JWT_SECRET_SIZE);
 setInterval(() => {
-  JWT_SECRET = crypto.randomBytes(Math.ceil(JWT_SECRET_SIZE/2)).toString('hex').slice(0, JWT_SECRET_SIZE);
+  JWT_SECRET_USER = crypto.randomBytes(Math.ceil(JWT_SECRET_SIZE/2)).toString('hex').slice(0, JWT_SECRET_SIZE);
 }, JWT_SECRET_TIME);
 
 var UserSchema = new mongoose.Schema({
@@ -43,7 +43,7 @@ UserSchema.methods.generateAuthToken = function() {
   var user = this;
   var access = 'auth';
   var token = jwt.sign({ _id: user._id.toHexString(), access },
-                        JWT_SECRET,
+                        JWT_SECRET_USER,
                         { expiresIn: '12h'}).toString();
 
   user.tokens = user.tokens.concat([{ access, token }]);
@@ -58,7 +58,7 @@ UserSchema.statics.findByCredentials = function (username, password) {
 
   return User.findOne({ username }).then((user) => {
     if (!user) {
-      return Promise.reject();
+      return Promise.reject(`User doesn't exists`);
     }
 
     return new Promise((resolve, reject) => {
@@ -66,7 +66,7 @@ UserSchema.statics.findByCredentials = function (username, password) {
         if (res) {
           resolve(user);
         } else {
-          reject();
+          reject('Password incorrect');
         }
       });
     });
@@ -78,9 +78,9 @@ UserSchema.statics.findByToken = function (token) {
   var decoded;
 
   try {
-    decoded = jwt.verify(token, JWT_SECRET);
+    decoded = jwt.verify(token, JWT_SECRET_USER);
   } catch (e) {
-    return Promise.reject();
+    return Promise.reject(`Invalid JWT.`);
   }
 
   return User.findOne({
@@ -124,4 +124,4 @@ UserSchema.pre('save', function (next) {
 
 var User = mongoose.model('User', UserSchema);
 
-module.exports = { User };
+module.exports = { User, JWT_SECRET_USER };

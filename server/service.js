@@ -66,7 +66,6 @@ ServiceSchema.statics.addDeviceToService = function (nameService, nameDevice) {
     if (!service) {
       throw new Error('No service found');
     }
-
     return Device.findOne({ 'name': nameDevice }).then((device) => {
       if (!device) {
         throw new Error('No device found');
