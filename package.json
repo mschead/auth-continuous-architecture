@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node server/app.js",
-    "test": "mocha server/**/*.test.js"    
+    "test": "mocha server/**/*.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "eslint": "^4.19.1",
-    "expect": "^21.1.0",
+    "jest": "^22.4.3",
     "mocha": "^3.0.2",
     "supertest": "^2.0.0"
   }
