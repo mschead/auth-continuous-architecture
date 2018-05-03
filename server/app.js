@@ -18,6 +18,7 @@ var io = socketIO(server);
 app.use(bodyParser.json());
 app.use(express.static(publicPath));
 
+console.log('olar);
 
 app.post('/user/login', (req, res) => {
 
