@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -29,11 +30,22 @@ public class MainActivity extends AppCompatActivity {
     private Map<String, Double> pesos = new HashMap<>();
     private Double currentNDC = 100.00;
 
+    public void sendMessage(View view) {
+//        Intent intent = new Intent(this, DeviceListActivity.class);
+//        EditText editText = (EditText) findViewById(R.id.editText);
+//        String message = editText.getText().toString();
+//        intent.putExtra(EXTRA_MESSAGE, message);
+//        startActivity(intent);
+        System.out.println("estoy aqui!");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        
         pesos.put("device_001", 1.0);
         try {
             socket = IO.socket(URI);
