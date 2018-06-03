@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Continuous Authenticator</string>
+    <string name="admin_label">Admin Locking</string>
+    <string name="device_admin_description">Allows locking screen with continuous authentication middleware</string>
+</resources>
