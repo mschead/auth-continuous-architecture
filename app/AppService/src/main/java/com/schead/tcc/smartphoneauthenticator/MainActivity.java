@@ -80,14 +80,14 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         String name = ((JSONObject) args[0]).getString("device");
                         double value = ((JSONObject) args[0]).getDouble("value");
-                        double nextNDC = 53.6; //getNextNDC(name, value);
+                        double nextNDC = getNextNDC(name, value);
 
                         if (nextNDC < 60.0) {
-                            showNotification(53.6, "Please, authenticate yourself again!");
+                            showNotification(nextNDC, "Please, authenticate yourself again!");
                             DevicePolicyManager mDP = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
                             mDP.lockNow();
                         } else {
-                            showNotification(value, "It's seems you own this device");
+                            showNotification(nextNDC, "It's seems you own this device");
                         }
 
                     } catch (JSONException e) {
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private double getNextNDC(String senderDevice, double senderValue) {
-        double outrosPesos = 0.0;
+        double outrosPesos = pesos.keySet().size() == 1 ? 1.0 : 0.0;
         double senderNDC = 0.0;
 
         for (String device : pesos.keySet()) {
