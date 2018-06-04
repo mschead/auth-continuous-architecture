@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.View;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -31,21 +32,15 @@ public class MainActivity extends AppCompatActivity {
     private Double currentNDC = 100.00;
 
     public void sendMessage(View view) {
-//        Intent intent = new Intent(this, DeviceListActivity.class);
-//        EditText editText = (EditText) findViewById(R.id.editText);
-//        String message = editText.getText().toString();
-//        intent.putExtra(EXTRA_MESSAGE, message);
-//        startActivity(intent);
-        System.out.println("estoy aqui!");
+        Intent intent = new Intent(this, DeviceListActivity.class);
+        startActivity(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        
+
         pesos.put("device_001", 1.0);
         try {
             socket = IO.socket(URI);
@@ -156,6 +151,13 @@ public class MainActivity extends AppCompatActivity {
 
         // mId allows you to update the notification later on.
         mNotificationManager.notify(1, mBuilder.build());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
 }
