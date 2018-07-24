@@ -26,131 +26,15 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Socket socket;
-    private final String URI = "https://tccmarcos.labsec.ufsc.br:8080";
-    private Map<String, Double> pesos = new HashMap<>();
-    private Double currentNDC = 100.00;
-
-    public void sendMessage(View view) {
-        Intent intent = new Intent(this, DeviceListActivity.class);
-        startActivity(intent);
-    }
+    private SocketManager socketManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        pesos.put("device_001", 1.0);
-        try {
-            socket = IO.socket(URI);
-            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    JSONObject obj = new JSONObject();
-                    try {
-                        obj.put("username", "service_001");
-                        obj.put("password", "service_001");
-                        socket.emit("authentication", obj);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }).on("authenticated", new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    showNotification(100,"It's seems you own this device");
-                }
-
-            }).on("unauthorized", new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    System.out.println("Wrong credentials.");
-                }
-
-            }).on("newValue", new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-
-                    try {
-                        String name = ((JSONObject) args[0]).getString("device");
-                        double value = ((JSONObject) args[0]).getDouble("value");
-                        double nextNDC = getNextNDC(name, value);
-
-                        if (nextNDC < 60.0) {
-                            showNotification(nextNDC, "Please, authenticate yourself again!");
-                            DevicePolicyManager mDP = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-                            mDP.lockNow();
-                        } else {
-                            showNotification(nextNDC, "It's seems you own this device");
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-
-
-                }
-
-            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {}
-
-            });
-
-            socket.connect();
-
-            JSONObject joinObj = new JSONObject();
-            try {
-                joinObj.put("name", "device_001");
-                socket.emit("join", joinObj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    private double getNextNDC(String senderDevice, double senderValue) {
-        double outrosPesos = pesos.keySet().size() == 1 ? 1.0 : 0.0;
-        double senderNDC = 0.0;
-
-        for (String device : pesos.keySet()) {
-            if (device.equals(senderDevice)) {
-                senderNDC = senderValue * pesos.get(device);
-            } else {
-                outrosPesos += pesos.get(device);
-            }
-        }
-
-        return (currentNDC * outrosPesos + senderNDC) / (outrosPesos + pesos.get(senderDevice));
-    }
-
-    private void showNotification(double value, String message) {
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this, "0")
-                        .setSmallIcon(R.drawable.lock)
-                        .setContentTitle("Last NDC: " + value)
-                        .setContentText(message)
-                        .setOngoing(true);
-
-        // Creates an explicit intent for an Activity in your app
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // mId allows you to update the notification later on.
-        mNotificationManager.notify(1, mBuilder.build());
+        Notifier notifier = new Notifier(this);
+        this.socketManager = new SocketManager(notifier);
     }
 
     @Override
@@ -158,6 +42,11 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, DeviceListActivity.class);
+        startActivity(intent);
     }
 
 }
